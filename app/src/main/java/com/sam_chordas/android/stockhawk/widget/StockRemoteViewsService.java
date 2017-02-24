@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.util.Log;
 import android.widget.AdapterView;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
@@ -23,6 +24,7 @@ public class StockRemoteViewsService extends RemoteViewsService {
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
+        Log.i("SRVS", "onGetViewFactory");
         return new RemoteViewsFactory() {
             private Cursor data = null;
 
@@ -46,7 +48,7 @@ public class StockRemoteViewsService extends RemoteViewsService {
 
                 final long identityToken = Binder.clearCallingIdentity();
 
-
+                Log.i("SRVS", "onDataSetChanged");
                 data = getContentResolver().query(uri,
                         STOCK_COLUMNS,
                         null,
@@ -70,6 +72,7 @@ public class StockRemoteViewsService extends RemoteViewsService {
 
             @Override
             public RemoteViews getViewAt(int position) {
+                Log.i("SRVS", "getViewAt");
                 if (position == AdapterView.INVALID_POSITION ||
                         data == null || !data.moveToPosition(position)) {
                     return null;
@@ -86,7 +89,7 @@ public class StockRemoteViewsService extends RemoteViewsService {
                 }
                 views.setTextViewText(R.id.stock_symbol, stock_symbol);
                 views.setTextViewText(R.id.bid_price,bid_price);
-                //views.setTextViewText(R.id.change, change);
+                views.setTextViewText(R.id.change, change);
                 if (Utils.showPercent){
                     views.setTextViewText(R.id.change, percent_change);
                 } else{
@@ -99,10 +102,10 @@ public class StockRemoteViewsService extends RemoteViewsService {
                 }
 
 
-                /*final Intent fillInIntent = new Intent();
+                final Intent fillInIntent = new Intent();
 
                 fillInIntent.setData(uri.buildUpon().appendPath(QuoteColumns._ID).build());
-                views.setOnClickFillInIntent(R.id.widget_list_item, fillInIntent);*/
+                views.setOnClickFillInIntent(R.id.widget_list_item, fillInIntent);
                 return views;
             }
 
@@ -110,7 +113,7 @@ public class StockRemoteViewsService extends RemoteViewsService {
             private void setRemoteContentDescription(RemoteViews views, String description) {
 
                 views.setContentDescription(R.id.stock_symbol,
-                        data.getString(data.getColumnIndex(QuoteColumns.NAME)));
+                        data.getString(data.getColumnIndex(QuoteColumns.SYMBOL)));
                 views.setContentDescription(R.id.bid_price,
                         data.getString(data.getColumnIndex(QuoteColumns.BIDPRICE)));
                 if (Utils.showPercent){
@@ -124,6 +127,7 @@ public class StockRemoteViewsService extends RemoteViewsService {
 
             @Override
             public RemoteViews getLoadingView() {
+                Log.i("SRVS", "getLoadingView");
                 return new RemoteViews(getPackageName(), R.layout.widget_detail_list_item);
             }
 

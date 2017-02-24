@@ -2,7 +2,6 @@ package com.sam_chordas.android.stockhawk.ui;
 
 import android.app.Activity;
 import android.app.LoaderManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -10,14 +9,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.customtabs.CustomTabsCallback;
-import android.support.customtabs.CustomTabsClient;
-import android.support.customtabs.CustomTabsIntent;
-import android.support.customtabs.CustomTabsService;
-import android.support.customtabs.CustomTabsServiceConnection;
-import android.support.customtabs.CustomTabsSession;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +22,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -48,6 +41,7 @@ import com.sam_chordas.android.stockhawk.service.StockTaskService;
 import com.sam_chordas.android.stockhawk.touch_helper.SimpleItemTouchHelperCallback;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 public class MyStocksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -66,25 +60,17 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     private Context mContext;
     private Cursor mCursor;
     boolean isConnected;
+    static ArrayList<StockData> StockData;
     private Activity activity = this;
-    private CustomTabsClient mClient;
-    private CustomTabsSession mCustomTabsSession;
-    public static final String CUSTOM_TAB_PACKAGE_NAME = "com.android.chrome";  // Change when in stable
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
-        //ConnectivityManager Class that answers queries about the state of network connectivity.
-        //Context method returns the handle to a system-level service by class.
-        ConnectivityManager cm =
-                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        //Describes the status of a network interface. must use ConnectivityManager to get NetworkInfo obj
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
+        StockData = new ArrayList<StockData>();
+        isConnected = isConnected();
         setContentView(R.layout.activity_my_stocks);
-        final RecyclerView recyclerView2 = (RecyclerView) findViewById(R.id.empty_recycler_view);
+        final FrameLayout frameLayout = (FrameLayout) findViewById(R.id.stock_framelayout);
         if (isConnected) {
         }
         // The intent service is for executing immediate pulls from the Yahoo API
@@ -96,26 +82,9 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
             if (isConnected) {
                 startService(mServiceIntent);
             } else {
-                networkSnackbar(recyclerView2);
+                networkSnackbar(frameLayout);
             }
         }
-
-        CustomTabsServiceConnection connection = new CustomTabsServiceConnection() {
-            @Override
-            public void onCustomTabsServiceConnected(ComponentName name, CustomTabsClient client) {
-                mClient = client;
-                mClient.warmup(0L);
-                mCustomTabsSession = mClient.newSession(new CustomTabsCallback());
-                mCustomTabsSession.mayLaunchUrl(Uri.parse("https://finance.yahoo.com/q?s=YHOO"), null, preloadURLS());
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-            }
-        };
-        boolean ok = CustomTabsClient.bindCustomTabsService(this, CUSTOM_TAB_PACKAGE_NAME, connection);
-        Log.i("ok", Boolean.toString(ok));
-
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -126,25 +95,35 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                 new RecyclerViewItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View v, int position) {
+                        GraphAsyncTask task = new GraphAsyncTask();
+                        if (mCursor.moveToPosition(position)) {
+                            Log.i("MSA", "cursor works");
+                            String symbol = mCursor.getString(mCursor.getColumnIndex(QuoteColumns.SYMBOL));
+                            Log.i("MSA", symbol);
+                            task.execute(symbol);
+                            try {
+                                task.get();
+                            } catch (InterruptedException e) {
 
-                        String url = "https://finance.yahoo.com/q?s=";
-                        mCursor.moveToPosition(position);
-                        url += mCursor.getString(mCursor.getColumnIndex("symbol"));
-                        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder(mCustomTabsSession);
-                        builder.setToolbarColor(getResources().getColor(R.color.material_blue_500));
-                        CustomTabsIntent customTabsIntent = builder.build();
-                        customTabsIntent.launchUrl(activity, Uri.parse(url));
+                            } catch (ExecutionException e) {
+
+                            }
+                        }
+
+                        if (!StockData.isEmpty()) {
+                            Log.i("MSA", "ArrayList not empty");
+                            Intent intent = new Intent(activity, GraphActivity.class);
+                            startActivity(intent);
+                        }
                     }
                 }));
         recyclerView.setAdapter(mCursorAdapter);
-
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.attachToRecyclerView(recyclerView);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("MSA fab OCL", "called");
                 if (isConnected) {
                     new MaterialDialog.Builder(mContext).title(R.string.symbol_search)
                             .content(R.string.content_test)
@@ -152,7 +131,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                             .input(R.string.input_hint, R.string.input_prefill, new MaterialDialog.InputCallback() {
                                 @Override
                                 public void onInput(MaterialDialog dialog, CharSequence input) {
-
                                     // On FAB click, receive user input. Make sure the stock doesn't already exist
                                     // in the DB and proceed accordingly
                                     Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
@@ -177,7 +155,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                             })
                             .show().setCanceledOnTouchOutside(false);
                 } else {
-                    networkSnackbar(recyclerView2);
+                    networkSnackbar(frameLayout);
                 }
             }
         });
@@ -191,7 +169,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
             long period = 3600L;
             long flex = 10L;
             String periodicTag = "periodic";
-
             // create a periodic task to pull stocks once every hour after the app has been opened. This
             // is so Widget data stays up to date.
             PeriodicTask periodicTask = new PeriodicTask.Builder()
@@ -207,7 +184,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
             GcmNetworkManager.getInstance(this).schedule(periodicTask);
         }
     }
-
 
     @Override
     public void onResume() {
@@ -282,26 +258,14 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         mCursorAdapter.swapCursor(null);
     }
 
-    private ArrayList<Bundle> preloadURLS() {
-        ArrayList<Bundle> bundles = new ArrayList<>();
-        if (mCursor != null) {
-            while (mCursor.moveToNext()) {
-                Bundle bundle = new Bundle();
-                String url = "https://finance.yahoo.com/q?s=";
-                bundle.putParcelable(CustomTabsService.KEY_URL, Uri.parse(url + mCursor.getString(mCursor.getColumnIndex("symbol"))));
-                bundles.add(bundle);
-            }
-        } else {
-            String[] urlList = new String[]{"https://finance.yahoo.com/q?s=YHOO", "https://finance.yahoo.com/q?s=AAPL",
-                    "https://finance.yahoo.com/q?s=GOOG", "https://finance.yahoo.com/q?s=MSFT"};
-            for (String url : urlList) {
-                Bundle bundle = new Bundle();
-                bundle.putParcelable(CustomTabsService.KEY_URL, Uri.parse(url));
-                bundles.add(bundle);
-            }
-        }
-        return bundles;
+    public boolean isConnected() {
+        //ConnectivityManager Class that answers queries about the state of network connectivity.
+        //Context method returns the handle to a system-level service by class.
+        ConnectivityManager cm =
+                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        //Describes the status of a network interface. must use ConnectivityManager to get NetworkInfo obj
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
-
 
 }
