@@ -84,6 +84,8 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
     notifyItemRemoved(position);
   }
 
+
+
   @Override public int getItemCount() {
     return super.getItemCount();
   }

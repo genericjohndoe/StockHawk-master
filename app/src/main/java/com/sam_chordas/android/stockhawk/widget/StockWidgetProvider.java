@@ -2,7 +2,6 @@ package com.sam_chordas.android.stockhawk.widget;
 
 import android.annotation.TargetApi;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
@@ -26,14 +25,16 @@ public class StockWidgetProvider extends AppWidgetProvider {
     //public static final String CUSTOM_TAB_PACKAGE_NAME = "com.android.chrome";
 
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        super.onUpdate(context, appWidgetManager, appWidgetIds);
+        //super.onUpdate(context, appWidgetManager, appWidgetIds);
         // Perform this loop procedure for each App Widget that belongs to this provider
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_detail);
-        Intent intent = new Intent(context, MyStocksActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-        views.setOnClickPendingIntent(R.id.widget_button, pendingIntent);
+
         for (int appWidgetId : appWidgetIds) {
             Log.i("SWP", "onUpdate");
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_detail);
+
+            Intent intent = new Intent(context, MyStocksActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+            views.setOnClickPendingIntent(R.id.widget_button, pendingIntent);
             //A class that describes a view hierarchy that can be displayed in another process.
             //The hierarchy is inflated from a layout resource file, and this class provides
             //some basic operations for modifying the content of the inflated hierarchy.
@@ -49,12 +50,12 @@ public class StockWidgetProvider extends AppWidgetProvider {
             }
             //boolean useDetailActivity = context.getResources()
             //        .getBoolean(R.bool.use_detail_activity);
-            Intent clickIntentTemplate = new Intent(context, MyStocksActivity.class);
+            /*Intent clickIntentTemplate = new Intent(context, MyStocksActivity.class);
 
             PendingIntent clickPendingIntentTemplate = TaskStackBuilder.create(context)
                     .addNextIntentWithParentStack(clickIntentTemplate)
                     .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-            views.setPendingIntentTemplate(R.id.widget, clickPendingIntentTemplate);
+            views.setPendingIntentTemplate(R.id.widget, clickPendingIntentTemplate);*/
             views.setEmptyView(R.id.widget_list, R.id.widget_empty);
 
             // Tell the AppWidgetManager to perform an update on the current app widget
