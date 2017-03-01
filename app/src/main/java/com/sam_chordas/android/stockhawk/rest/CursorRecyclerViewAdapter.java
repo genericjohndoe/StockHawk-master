@@ -12,11 +12,14 @@ import android.support.v7.widget.RecyclerView;
  * for the CursorRecyclerViewApater.java code and idea.
  */
 public abstract class  CursorRecyclerViewAdapter <VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH>{
+
   private static final String LOG_TAG = CursorRecyclerViewAdapter.class.getSimpleName();
   private Cursor mCursor;
   private boolean dataIsValid;
   private int rowIdColumn;
   private DataSetObserver mDataSetObserver;
+  private Context context;
+
   public CursorRecyclerViewAdapter(Context context, Cursor cursor){
     mCursor = cursor;
     dataIsValid = cursor != null;
@@ -25,6 +28,7 @@ public abstract class  CursorRecyclerViewAdapter <VH extends RecyclerView.ViewHo
     if (dataIsValid){
       mCursor.registerDataSetObserver(mDataSetObserver);
     }
+    this.context = context;
   }
 
   public Cursor getCursor(){
@@ -101,4 +105,5 @@ public abstract class  CursorRecyclerViewAdapter <VH extends RecyclerView.ViewHo
       notifyDataSetChanged();
     }
   }
+
 }

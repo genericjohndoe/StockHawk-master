@@ -12,6 +12,7 @@ public class StockData implements Parcelable {
     double price;
     String CalDate;
 
+
     public StockData(){}
 
     public StockData(long date, double price, String CalDate){

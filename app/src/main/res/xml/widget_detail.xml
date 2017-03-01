@@ -6,7 +6,11 @@
     android:minWidth="@dimen/widget_detail_default_width"
     android:updatePeriodMillis="900000"
     android:widgetCategory="home_screen"
-    tools:ignore="UnusedAttribute" />
+    tools:ignore="UnusedAttribute"
+    android:resizeMode="horizontal|vertical"
+    android:minResizeWidth="40dp"
+    android:minResizeHeight="40dp"
+    />
 
 <!--initialKeyguardLayout sets layout for lock screen-->
 <!--initialLayout sets the initial layout to be used until the remoteViews are available-->

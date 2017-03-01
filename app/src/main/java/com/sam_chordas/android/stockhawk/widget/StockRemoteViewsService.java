@@ -15,12 +15,17 @@ import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.rest.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by joeljohnson on 6/14/16.
  */
 public class StockRemoteViewsService extends RemoteViewsService {
     final String[] STOCK_COLUMNS = {QuoteColumns._ID, QuoteColumns.SYMBOL,QuoteColumns.PERCENT_CHANGE,
             QuoteColumns.CHANGE, QuoteColumns.BIDPRICE, QuoteColumns.ISCURRENT, QuoteColumns.ISUP};
+
+    List<String> mCollection = new ArrayList<>();
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
@@ -48,13 +53,19 @@ public class StockRemoteViewsService extends RemoteViewsService {
 
                 final long identityToken = Binder.clearCallingIdentity();
 
-                Log.i("SRVS", "onDataSetChanged");
                 data = getContentResolver().query(uri,
                         STOCK_COLUMNS,
-                        null,
+                        QuoteColumns.ISCURRENT + " = 1",
                         null,
                         null);
                 Binder.restoreCallingIdentity(identityToken);
+
+                /*for (int i = 0; i < data.getCount(); i++){
+                   if (data.moveToPosition(i)){
+                       new StockData(null,
+                               data.getString(data.getColumnIndex(QuoteColumns.BIDPRICE)))
+                   }
+                }*/
             }
 
             @Override
@@ -72,7 +83,6 @@ public class StockRemoteViewsService extends RemoteViewsService {
 
             @Override
             public RemoteViews getViewAt(int position) {
-                Log.i("SRVS", "getViewAt");
                 if (position == AdapterView.INVALID_POSITION ||
                         data == null || !data.moveToPosition(position)) {
                     return null;
@@ -103,7 +113,6 @@ public class StockRemoteViewsService extends RemoteViewsService {
 
 
                 final Intent fillInIntent = new Intent();
-
                 fillInIntent.setData(uri.buildUpon().appendPath(QuoteColumns._ID).build());
                 views.setOnClickFillInIntent(R.id.widget_list_item, fillInIntent);
                 return views;

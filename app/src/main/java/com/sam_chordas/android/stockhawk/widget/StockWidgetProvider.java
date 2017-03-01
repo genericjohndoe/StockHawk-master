@@ -35,6 +35,16 @@ public class StockWidgetProvider extends AppWidgetProvider {
             Intent intent = new Intent(context, MyStocksActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
             views.setOnClickPendingIntent(R.id.widget_button, pendingIntent);
+
+            Intent refreshIntent = new Intent(context,StockWidgetProvider.class);
+            refreshIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+// Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
+// since it seems the onUpdate() is only fired on that:
+            int[] ids = {appWidgetId};
+            refreshIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS,ids);
+            refreshIntent.setAction(StockTaskService.ACTION_DATA_UPDATED);
+            views.setOnClickPendingIntent(R.id.widget_refresh, PendingIntent.getBroadcast(context,
+                    0, refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             //A class that describes a view hierarchy that can be displayed in another process.
             //The hierarchy is inflated from a layout resource file, and this class provides
             //some basic operations for modifying the content of the inflated hierarchy.

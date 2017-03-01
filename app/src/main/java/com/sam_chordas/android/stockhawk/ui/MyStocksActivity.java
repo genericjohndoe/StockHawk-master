@@ -41,9 +41,8 @@ import com.sam_chordas.android.stockhawk.service.StockTaskService;
 import com.sam_chordas.android.stockhawk.touch_helper.SimpleItemTouchHelperCallback;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
-public class MyStocksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MyStocksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,GraphLoadedCallback {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -59,7 +58,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     private QuoteCursorAdapter mCursorAdapter;
     private Context mContext;
     private Cursor mCursor;
-    boolean isConnected;
     static ArrayList<StockData> StockData;
     private Activity activity = this;
 
@@ -68,10 +66,10 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         super.onCreate(savedInstanceState);
         mContext = this;
         StockData = new ArrayList<StockData>();
-        isConnected = isConnected();
+
         setContentView(R.layout.activity_my_stocks);
         final FrameLayout frameLayout = (FrameLayout) findViewById(R.id.stock_framelayout);
-        if (isConnected) {
+        if (isConnected()) {
         }
         // The intent service is for executing immediate pulls from the Yahoo API
         // GCMTaskService can only schedule tasks, they cannot execute immediately
@@ -79,7 +77,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         if (savedInstanceState == null) {
             // Run the initialize task service so that some stocks appear upon an empty database
             mServiceIntent.putExtra("tag", "init");
-            if (isConnected) {
+            if (isConnected()) {
                 startService(mServiceIntent);
             } else {
                 networkSnackbar(frameLayout);
@@ -95,25 +93,10 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                 new RecyclerViewItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View v, int position) {
-                        GraphAsyncTask task = new GraphAsyncTask();
+                        GraphAsyncTask task = new GraphAsyncTask(MyStocksActivity.this);
                         if (mCursor.moveToPosition(position)) {
-                            Log.i("MSA", "cursor works");
                             String symbol = mCursor.getString(mCursor.getColumnIndex(QuoteColumns.SYMBOL));
-                            Log.i("MSA", symbol);
                             task.execute(symbol);
-                            try {
-                                task.get();
-                            } catch (InterruptedException e) {
-
-                            } catch (ExecutionException e) {
-
-                            }
-                        }
-
-                        if (!StockData.isEmpty()) {
-                            Log.i("MSA", "ArrayList not empty");
-                            Intent intent = new Intent(activity, GraphActivity.class);
-                            startActivity(intent);
                         }
                     }
                 }));
@@ -124,7 +107,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isConnected) {
+                if (isConnected()) {
                     new MaterialDialog.Builder(mContext).title(R.string.symbol_search)
                             .content(R.string.content_test)
                             .inputType(InputType.TYPE_CLASS_TEXT)
@@ -165,7 +148,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         mItemTouchHelper.attachToRecyclerView(recyclerView);
 
         mTitle = getTitle();
-        if (isConnected) {
+        if (isConnected()) {
             long period = 3600L;
             long flex = 10L;
             String periodicTag = "periodic";
@@ -268,4 +251,13 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
+    @Override
+    public void graphDataLoaded() {
+        if (!StockData.isEmpty()) {
+            Intent intent = new Intent(activity, GraphActivity.class);
+            startActivity(intent);
+        }
+    }
+
 }
+

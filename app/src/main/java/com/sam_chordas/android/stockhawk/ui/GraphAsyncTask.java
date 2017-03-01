@@ -25,6 +25,12 @@ import okhttp3.Response;
 public class GraphAsyncTask extends AsyncTask<String, Void, Void> {
     String[] dates = new String[2];
 
+    GraphLoadedCallback graphLoadedCallback;
+
+    public GraphAsyncTask(GraphLoadedCallback graphLoadedCallback) {
+        this.graphLoadedCallback = graphLoadedCallback;
+    }
+
     private Void getStockInfoFromJSON(String JsonString)
             throws JSONException {
         MyStocksActivity.StockData = new ArrayList<>();
@@ -92,6 +98,12 @@ public class GraphAsyncTask extends AsyncTask<String, Void, Void> {
             Log.i("GAT", e.toString());
         }
         return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        graphLoadedCallback.graphDataLoaded();
+        super.onPostExecute(aVoid);
     }
 
 }
