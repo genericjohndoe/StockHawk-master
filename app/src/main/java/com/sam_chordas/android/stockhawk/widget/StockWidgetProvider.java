@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.sam_chordas.android.stockhawk.R;
@@ -29,7 +28,7 @@ public class StockWidgetProvider extends AppWidgetProvider {
         // Perform this loop procedure for each App Widget that belongs to this provider
 
         for (int appWidgetId : appWidgetIds) {
-            Log.i("SWP", "onUpdate");
+
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_detail);
 
             Intent intent = new Intent(context, MyStocksActivity.class);
@@ -93,7 +92,7 @@ public class StockWidgetProvider extends AppWidgetProvider {
     private void setRemoteAdapter(Context context, @NonNull final RemoteViews views) {
         views.setRemoteAdapter(R.id.widget_list,
                 new Intent(context, StockRemoteViewsService.class));
-        Log.i("SWP", "setRemoteAdapter");
+
     }
 
     /**
@@ -105,6 +104,5 @@ public class StockWidgetProvider extends AppWidgetProvider {
     private void setRemoteAdapterV11(Context context, @NonNull final RemoteViews views) {
         views.setRemoteAdapter(0, R.id.widget_list,
                 new Intent(context, StockRemoteViewsService.class));
-        Log.i("SWP", "setRemoteAdapterV11");
     }
 }

@@ -1,7 +1,6 @@
 package com.sam_chordas.android.stockhawk.ui;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,7 +37,7 @@ public class GraphAsyncTask extends AsyncTask<String, Void, Void> {
         JSONObject query = Json.getJSONObject("query");
         JSONObject results = query.getJSONObject("results");
         JSONArray StockInfo = results.getJSONArray("quote");
-        Log.i("GAT", StockInfo.toString());
+
         for (int i = 0; i < StockInfo.length(); i++) {
             StockData datum = new StockData();
             JSONObject stockPrice = StockInfo.getJSONObject(i);
@@ -50,7 +49,7 @@ public class GraphAsyncTask extends AsyncTask<String, Void, Void> {
             datum.price = stockPrice.getDouble("Close");
             datum.CalDate = stockPrice.getString("Date");
             MyStocksActivity.StockData.add(datum);
-            Log.i("GAT" ,datum.toString());
+
         }
         return null;
     }
@@ -83,7 +82,7 @@ public class GraphAsyncTask extends AsyncTask<String, Void, Void> {
             e.printStackTrace();
         }
         String url = urlStringBuilder.toString();
-        Log.i("GAT", url);
+
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -91,11 +90,11 @@ public class GraphAsyncTask extends AsyncTask<String, Void, Void> {
             Response response = client.newCall(request).execute();
             getStockInfoFromJSON(response.body().string());
         } catch (IOException e) {
-            Log.e("GAT", e.toString());
+
         } catch (JSONException e){
-            Log.e("GAT", e.toString());
+
         } catch (IllegalStateException e){
-            Log.i("GAT", e.toString());
+
         }
         return null;
     }

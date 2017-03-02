@@ -12,4 +12,20 @@
   <string name="FAB_content_desc">Add an additional stock</string>
   <string name="widget_title" translatable="false">Stock Hawk Widget</string>
   <string name="widget_refresh"> Refresh</string>
+  <string name="stock_price" translatable="false">Stock Price</string>
+  <string name="date_format" translatable="false">yyyy-MM-dd</string>
+  <string name="tag" translatable="false">tag</string>
+  <string name="init">init</string>
+  <string name="stock_saved">This stock is already saved!</string>
+  <string name="add" translatable="false">add</string>
+  <string name="periodic" translatable="false">periodic</string>
+  <string name="id" translatable="false">_id</string>
+  <string name="symbol" translatable="false">symbol</string>
+  <string name="percent_change" translatable="false">percent_change</string>
+  <string name="change" translatable="false">change</string>
+  <string name="bid_price" translatable="false">bid_price</string>
+  <string name="created" translatable="false">created</string>
+  <string name="is_up" translatable="false">is_up</string>
+  <string name="is_current" translatable="false">is_current</string>
+  <string name="Name" translatable="false">Name</string>
 </resources>

@@ -40,7 +40,7 @@ public class GraphActivity  extends AppCompatActivity implements IAxisValueForma
         }
         Collections.sort(entries, new EntryXComparator());
 
-        LineDataSet dataSet = new LineDataSet(entries, "Stock Price");
+        LineDataSet dataSet = new LineDataSet(entries, getString(R.string.stock_price));
         LineData lineData = new LineData(dataSet);
         chart.setData(lineData);
         XAxis xAxis = chart.getXAxis();
@@ -54,6 +54,6 @@ public class GraphActivity  extends AppCompatActivity implements IAxisValueForma
     public String getFormattedValue(float value, AxisBase axis) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis((long) value);
-        return new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime());
+        return new SimpleDateFormat(getString(R.string.date_format)).format(cal.getTime());
     }
 }

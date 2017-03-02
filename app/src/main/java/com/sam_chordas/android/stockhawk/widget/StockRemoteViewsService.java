@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
-import android.util.Log;
 import android.widget.AdapterView;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
@@ -29,7 +28,7 @@ public class StockRemoteViewsService extends RemoteViewsService {
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        Log.i("SRVS", "onGetViewFactory");
+
         return new RemoteViewsFactory() {
             private Cursor data = null;
 
@@ -105,7 +104,7 @@ public class StockRemoteViewsService extends RemoteViewsService {
                 } else{
                     views.setTextViewText(R.id.change, change);
                 }
-                if (data.getInt(data.getColumnIndex("is_up")) == 1){
+                if (data.getInt(data.getColumnIndex(QuoteColumns.ISUP)) == 1){
                     views.setTextColor(R.id.change, getResources().getColor(R.color.material_green_700));
                 } else {
                     views.setTextColor(R.id.change, getResources().getColor(R.color.material_red_700));
@@ -136,7 +135,6 @@ public class StockRemoteViewsService extends RemoteViewsService {
 
             @Override
             public RemoteViews getLoadingView() {
-                Log.i("SRVS", "getLoadingView");
                 return new RemoteViews(getPackageName(), R.layout.widget_detail_list_item);
             }
 

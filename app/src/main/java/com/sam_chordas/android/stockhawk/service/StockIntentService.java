@@ -4,9 +4,10 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.database.sqlite.SQLiteConstraintException;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.android.gms.gcm.TaskParams;
+import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 
 /**
  * Created by sam_chordas on 10/1/15.
@@ -28,16 +29,16 @@ public class StockIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.d(StockIntentService.class.getSimpleName(), "Stock Intent Service");
+
         StockTaskService stockTaskService = new StockTaskService(this);
         Bundle args = new Bundle();
-        if (intent.getStringExtra("tag").equals("add")) {
-            args.putString("symbol", intent.getStringExtra("symbol"));
+        if (intent.getStringExtra(getString(R.string.tag)).equals(getString(R.string.add))) {
+            args.putString(QuoteColumns.SYMBOL, intent.getStringExtra(QuoteColumns.SYMBOL));
         }
         // We can call OnRunTask from the intent service to force it to run immediately instead of
         // scheduling a task.
         try {
-            stockTaskService.onRunTask(new TaskParams(intent.getStringExtra("tag"), args));
+            stockTaskService.onRunTask(new TaskParams(intent.getStringExtra(getString(R.string.tag)), args));
         } catch (SQLiteConstraintException e) {
             e.printStackTrace();
         }
