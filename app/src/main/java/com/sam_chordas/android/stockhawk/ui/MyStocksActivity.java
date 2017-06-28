@@ -17,6 +17,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,7 +32,6 @@ import com.google.android.gms.gcm.Task;
 import com.melnykov.fab.FloatingActionButton;
 import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
-import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.QuoteCursorAdapter;
 import com.sam_chordas.android.stockhawk.rest.RecyclerViewItemClickListener;
 import com.sam_chordas.android.stockhawk.rest.Utils;
@@ -65,11 +65,11 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         super.onCreate(savedInstanceState);
         mContext = this;
         StockData = new ArrayList<StockData>();
-
         setContentView(R.layout.activity_my_stocks);
         final FrameLayout frameLayout = (FrameLayout) findViewById(R.id.stock_framelayout);
-        if (isConnected()) {
-        }
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
         // The intent service is for executing immediate pulls from the Yahoo API
         // GCMTaskService can only schedule tasks, they cannot execute immediately
         mServiceIntent = new Intent(this, StockIntentService.class);
@@ -83,8 +83,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
             }
         }
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         getLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
 
         mCursorAdapter = new QuoteCursorAdapter(this, null);
@@ -92,9 +90,10 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                 new RecyclerViewItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View v, int position) {
+                        Log.i("MSA" ,"clicked");
                         GraphAsyncTask task = new GraphAsyncTask(MyStocksActivity.this);
                         if (mCursor.moveToPosition(position)) {
-                            String symbol = mCursor.getString(mCursor.getColumnIndex(QuoteColumns.SYMBOL));
+                            String symbol = mCursor.getString(mCursor.getColumnIndex(QuoteColumns.QuoteEntry.SYMBOL));
                             task.execute(symbol);
                         }
                     }
@@ -109,14 +108,15 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                 if (isConnected()) {
                     new MaterialDialog.Builder(mContext).title(R.string.symbol_search)
                             .content(R.string.content_test)
+                            .backgroundColorRes(R.color.material_blue_grey_800)
                             .inputType(InputType.TYPE_CLASS_TEXT)
                             .input(R.string.input_hint, R.string.input_prefill, new MaterialDialog.InputCallback() {
                                 @Override
                                 public void onInput(MaterialDialog dialog, CharSequence input) {
                                     // On FAB click, receive user input. Make sure the stock doesn't already exist
                                     // in the DB and proceed accordingly
-                                    Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
-                                            new String[]{QuoteColumns.SYMBOL}, QuoteColumns.SYMBOL + "= ?",
+                                    Cursor c = getContentResolver().query(QuoteColumns.QuoteEntry.CONTENT_URI,
+                                            new String[]{QuoteColumns.QuoteEntry.SYMBOL}, QuoteColumns.QuoteEntry.SYMBOL + "= ?",
                                             new String[]{input.toString()}, null);
                                     if (c.getCount() != 0) {
                                         //doesn't work for default stocks
@@ -130,9 +130,10 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                                     } else {
                                         // Add the stock to DB
                                         mServiceIntent.putExtra(getString(R.string.tag), getString(R.string.add));
-                                        mServiceIntent.putExtra(QuoteColumns.SYMBOL, input.toString());
+                                        mServiceIntent.putExtra(QuoteColumns.QuoteEntry.SYMBOL, input.toString());
                                         startService(mServiceIntent);
                                     }
+                                    c.close();
                                 }
                             })
                             .show().setCanceledOnTouchOutside(false);
@@ -212,7 +213,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         if (id == R.id.action_change_units) {
             // this is for changing stock changes from percent value to dollar value
             Utils.showPercent = !Utils.showPercent;
-            this.getContentResolver().notifyChange(QuoteProvider.Quotes.CONTENT_URI, null);
+            this.getContentResolver().notifyChange(QuoteColumns.QuoteEntry.CONTENT_URI, null);
         }
 
         return super.onOptionsItemSelected(item);
@@ -221,18 +222,20 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         // This narrows the return to only the stocks that are most current.
-        return new CursorLoader(this, QuoteProvider.Quotes.CONTENT_URI,
-                new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
-                        QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
-                QuoteColumns.ISCURRENT + " = ?",
+        return new CursorLoader(this, QuoteColumns.QuoteEntry.CONTENT_URI,
+                new String[]{QuoteColumns.QuoteEntry._ID, QuoteColumns.QuoteEntry.SYMBOL, QuoteColumns.QuoteEntry.BIDPRICE,
+                        QuoteColumns.QuoteEntry.PERCENT_CHANGE, QuoteColumns.QuoteEntry.CHANGE, QuoteColumns.QuoteEntry.ISUP},
+                QuoteColumns.QuoteEntry.ISCURRENT + " = ?",
                 new String[]{"1"},
                 null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        data.setNotificationUri(getContentResolver(), QuoteColumns.QuoteEntry.CONTENT_URI);
         mCursorAdapter.swapCursor(data);
         mCursor = data;
+        Log.i("MSA", ""+data.getCount());
     }
 
     @Override
@@ -253,10 +256,12 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     @Override
     public void graphDataLoaded() {
         if (!StockData.isEmpty()) {
+            Log.i("MSA", "Stock data isn't empty");
             Intent intent = new Intent(activity, GraphActivity.class);
             startActivity(intent);
         }
     }
+
 
 }
 

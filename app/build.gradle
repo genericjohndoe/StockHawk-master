@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 apply plugin: 'android-apt'
 
 android {
-  compileSdkVersion 23
-  buildToolsVersion "23.0.1"
+  compileSdkVersion 25
+  buildToolsVersion '26.0.0'
 
   defaultConfig {
     applicationId "com.example.sam_chordas.stockhawk"
-    minSdkVersion 16
-    targetSdkVersion 23
+    minSdkVersion 17
+    targetSdkVersion 26
     versionCode 1
     versionName "1.0"
   }
@@ -26,13 +26,13 @@ repositories {
 
 dependencies {
 
-  compile 'com.google.android.gms:play-services-gcm:8.4.0'
-  compile 'com.android.support:customtabs:23.3.0'
+  compile 'com.google.android.gms:play-services-gcm:11.0.1'
+  compile 'com.android.support:customtabs:25.3.1'
   compile 'com.squareup.okhttp3:okhttp:3.6.0'
-  apt 'net.simonvt.schematic:schematic-compiler:0.6.3'
+  annotationProcessor 'net.simonvt.schematic:schematic-compiler:0.6.3'
   compile 'net.simonvt.schematic:schematic:0.6.3'
   compile 'com.melnykov:floatingactionbutton:1.2.0'
-  compile 'com.android.support:design:23.1.1'
+  compile 'com.android.support:design:25.3.1'
   compile('com.github.afollestad.material-dialogs:core:0.8.5.7@aar') {
     transitive = true
   }

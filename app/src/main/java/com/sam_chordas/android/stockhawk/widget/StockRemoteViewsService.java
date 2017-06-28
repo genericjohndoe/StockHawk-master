@@ -21,8 +21,8 @@ import java.util.List;
  * Created by joeljohnson on 6/14/16.
  */
 public class StockRemoteViewsService extends RemoteViewsService {
-    final String[] STOCK_COLUMNS = {QuoteColumns._ID, QuoteColumns.SYMBOL,QuoteColumns.PERCENT_CHANGE,
-            QuoteColumns.CHANGE, QuoteColumns.BIDPRICE, QuoteColumns.ISCURRENT, QuoteColumns.ISUP};
+    final String[] STOCK_COLUMNS = {QuoteColumns.QuoteEntry._ID, QuoteColumns.QuoteEntry.SYMBOL,QuoteColumns.QuoteEntry.PERCENT_CHANGE,
+            QuoteColumns.QuoteEntry.CHANGE, QuoteColumns.QuoteEntry.BIDPRICE, QuoteColumns.QuoteEntry.ISCURRENT, QuoteColumns.QuoteEntry.ISUP};
 
     List<String> mCollection = new ArrayList<>();
 
@@ -54,7 +54,7 @@ public class StockRemoteViewsService extends RemoteViewsService {
 
                 data = getContentResolver().query(uri,
                         STOCK_COLUMNS,
-                        QuoteColumns.ISCURRENT + " = 1",
+                        QuoteColumns.QuoteEntry.ISCURRENT + " = 1",
                         null,
                         null);
                 Binder.restoreCallingIdentity(identityToken);
@@ -88,14 +88,14 @@ public class StockRemoteViewsService extends RemoteViewsService {
                 }
                 RemoteViews views = new RemoteViews(getPackageName(),
                         R.layout.widget_detail_list_item);
-                String stock_symbol = data.getString(data.getColumnIndex(QuoteColumns.SYMBOL));
-                String bid_price = data.getString(data.getColumnIndex(QuoteColumns.BIDPRICE));
-                String change = data.getString(data.getColumnIndex(QuoteColumns.CHANGE));
-                String percent_change = data.getString(data.getColumnIndex(QuoteColumns.PERCENT_CHANGE));
+                String stock_symbol = data.getString(data.getColumnIndex(QuoteColumns.QuoteEntry.SYMBOL));
+                String bid_price = data.getString(data.getColumnIndex(QuoteColumns.QuoteEntry.BIDPRICE));
+                String change = data.getString(data.getColumnIndex(QuoteColumns.QuoteEntry.CHANGE));
+                String percent_change = data.getString(data.getColumnIndex(QuoteColumns.QuoteEntry.PERCENT_CHANGE));
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+
                     setRemoteContentDescription(views, null);
-                }
+
                 views.setTextViewText(R.id.stock_symbol, stock_symbol);
                 views.setTextViewText(R.id.bid_price,bid_price);
                 views.setTextViewText(R.id.change, change);
@@ -104,7 +104,7 @@ public class StockRemoteViewsService extends RemoteViewsService {
                 } else{
                     views.setTextViewText(R.id.change, change);
                 }
-                if (data.getInt(data.getColumnIndex(QuoteColumns.ISUP)) == 1){
+                if (data.getInt(data.getColumnIndex(QuoteColumns.QuoteEntry.ISUP)) == 1){
                     views.setTextColor(R.id.change, getResources().getColor(R.color.material_green_700));
                 } else {
                     views.setTextColor(R.id.change, getResources().getColor(R.color.material_red_700));
@@ -112,7 +112,7 @@ public class StockRemoteViewsService extends RemoteViewsService {
 
 
                 final Intent fillInIntent = new Intent();
-                fillInIntent.setData(uri.buildUpon().appendPath(QuoteColumns._ID).build());
+                fillInIntent.setData(uri.buildUpon().appendPath(QuoteColumns.QuoteEntry._ID).build());
                 views.setOnClickFillInIntent(R.id.widget_list_item, fillInIntent);
                 return views;
             }
@@ -121,15 +121,15 @@ public class StockRemoteViewsService extends RemoteViewsService {
             private void setRemoteContentDescription(RemoteViews views, String description) {
 
                 views.setContentDescription(R.id.stock_symbol,
-                        data.getString(data.getColumnIndex(QuoteColumns.SYMBOL)));
+                        data.getString(data.getColumnIndex(QuoteColumns.QuoteEntry.SYMBOL)));
                 views.setContentDescription(R.id.bid_price,
-                        data.getString(data.getColumnIndex(QuoteColumns.BIDPRICE)));
+                        data.getString(data.getColumnIndex(QuoteColumns.QuoteEntry.BIDPRICE)));
                 if (Utils.showPercent){
                     views.setContentDescription(R.id.change,
-                            data.getString(data.getColumnIndex(QuoteColumns.PERCENT_CHANGE)));
+                            data.getString(data.getColumnIndex(QuoteColumns.QuoteEntry.PERCENT_CHANGE)));
                 } else{
                     views.setContentDescription(R.id.change,
-                            data.getString(data.getColumnIndex(QuoteColumns.CHANGE)));
+                            data.getString(data.getColumnIndex(QuoteColumns.QuoteEntry.CHANGE)));
                 }
             }
 
@@ -146,7 +146,7 @@ public class StockRemoteViewsService extends RemoteViewsService {
             @Override
             public long getItemId(int position) {
                 if (data.moveToPosition(position))
-                    return data.getLong(data.getColumnIndex(QuoteColumns._ID));
+                    return data.getLong(data.getColumnIndex(QuoteColumns.QuoteEntry._ID));
                 return position;
             }
 

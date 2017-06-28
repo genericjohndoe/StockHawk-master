@@ -25,7 +25,7 @@ public abstract class  CursorRecyclerViewAdapter <VH extends RecyclerView.ViewHo
   public CursorRecyclerViewAdapter(Context context, Cursor cursor){
     mCursor = cursor;
     dataIsValid = cursor != null;
-    rowIdColumn = dataIsValid ? mCursor.getColumnIndex(QuoteColumns._ID) : -1;
+    rowIdColumn = dataIsValid ? mCursor.getColumnIndex(QuoteColumns.QuoteEntry._ID) : -1;
     mDataSetObserver = new NotifyingDataSetObserver();
     if (dataIsValid){
       mCursor.registerDataSetObserver(mDataSetObserver);
@@ -83,7 +83,7 @@ public abstract class  CursorRecyclerViewAdapter <VH extends RecyclerView.ViewHo
       if (mDataSetObserver != null){
         mCursor.registerDataSetObserver(mDataSetObserver);
       }
-      rowIdColumn = newCursor.getColumnIndexOrThrow(QuoteColumns._ID);
+      rowIdColumn = newCursor.getColumnIndexOrThrow(QuoteColumns.QuoteEntry._ID);
       dataIsValid = true;
       notifyDataSetChanged();
     }else{

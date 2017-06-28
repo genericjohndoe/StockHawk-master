@@ -19,7 +19,7 @@
             style="@style/StockSymbolTextStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="left|center_vertical"
+            android:gravity="start|center_vertical"
             tools:text="GOOG" />
 
         <TextView
@@ -27,9 +27,8 @@
             style="@style/BidPriceTextStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/change"
+            android:layout_toStartOf="@id/change"
             android:paddingEnd="10sp"
-            android:paddingRight="10sp"
             tools:text="1000.00" />
 
         <TextView
@@ -37,7 +36,7 @@
             style="@style/PercentChangeTextStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:background="@drawable/percent_change_pill"
             android:paddingEnd="3dp"
             android:paddingLeft="3dp"

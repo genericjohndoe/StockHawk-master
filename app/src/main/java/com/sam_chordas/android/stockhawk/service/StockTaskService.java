@@ -2,10 +2,8 @@ package com.sam_chordas.android.stockhawk.service;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
@@ -14,7 +12,6 @@ import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
-import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.Utils;
 
 import java.io.IOException;
@@ -73,14 +70,14 @@ public class StockTaskService extends GcmTaskService{
     }
     if (params.getTag().equals("init") || params.getTag().equals("periodic")){
       isUpdate = true;
-      initQueryCursor = mContext.getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
-          new String[] { "Distinct " + QuoteColumns.SYMBOL }, null,
+      initQueryCursor = mContext.getContentResolver().query(QuoteColumns.QuoteEntry.CONTENT_URI,
+          new String[] { "Distinct " + QuoteColumns.QuoteEntry.SYMBOL }, null,
           null, null);
       if (initQueryCursor.getCount() == 0 || initQueryCursor == null){
         // Init task. Populates DB with quotes for the symbols seen below
         try {
           urlStringBuilder.append(
-              URLEncoder.encode("\"YHOO\",\"AAPL\",\"GOOG\",\"MSFT\")", "UTF-8"));
+              URLEncoder.encode("\"AMZN\",\"AAPL\",\"GOOG\",\"MSFT\")", "UTF-8"));
         } catch (UnsupportedEncodingException e) {
           e.printStackTrace();
         }
@@ -125,26 +122,22 @@ public class StockTaskService extends GcmTaskService{
       Log.i("url", urlString);
       try{
         getResponse = fetchData(urlString);
+        Log.i("STS", getResponse);
         result = GcmNetworkManager.RESULT_SUCCESS;
-        try {
+
           ContentValues contentValues = new ContentValues();
           // update ISCURRENT to 0 (false) so new data is current
           if (isUpdate){
-            contentValues.put(QuoteColumns.ISCURRENT, 0);
-            mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI, contentValues,
+            //TODO: Delete old data
+            contentValues.put(QuoteColumns.QuoteEntry.ISCURRENT, 0);
+            mContext.getContentResolver().update(QuoteColumns.QuoteEntry.CONTENT_URI, contentValues,
                 null, null);
           }
-          mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
+          int inserted = mContext.getContentResolver().bulkInsert(QuoteColumns.QuoteEntry.CONTENT_URI,
               Utils.quoteJsonToContentVals(getResponse));
-        }catch (RemoteException | OperationApplicationException e){
-          Log.e(LOG_TAG, "Error applying batch insert", e);
-          /*Toast toast =
-                  Toast.makeText(mContext, "This stock doesn't exist!",
-                          Toast.LENGTH_LONG);
-          toast.setGravity(Gravity.CENTER, Gravity.CENTER, 0);
-          toast.show();*/
-        }
-      } catch (IOException e){
+        Log.i("STS", "inserted: " + inserted);
+
+      }catch (IOException e){
         e.printStackTrace();
       }
     }

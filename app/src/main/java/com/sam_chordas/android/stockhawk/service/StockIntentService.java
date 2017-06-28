@@ -33,7 +33,7 @@ public class StockIntentService extends IntentService {
         StockTaskService stockTaskService = new StockTaskService(this);
         Bundle args = new Bundle();
         if (intent.getStringExtra(getString(R.string.tag)).equals(getString(R.string.add))) {
-            args.putString(QuoteColumns.SYMBOL, intent.getStringExtra(QuoteColumns.SYMBOL));
+            args.putString(QuoteColumns.QuoteEntry.SYMBOL, intent.getStringExtra(QuoteColumns.QuoteEntry.SYMBOL));
         }
         // We can call OnRunTask from the intent service to force it to run immediately instead of
         // scheduling a task.
@@ -42,5 +42,6 @@ public class StockIntentService extends IntentService {
         } catch (SQLiteConstraintException e) {
             e.printStackTrace();
         }
+
     }
 }
