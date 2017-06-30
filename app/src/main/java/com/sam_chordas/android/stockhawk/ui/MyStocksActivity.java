@@ -127,7 +127,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                                         toast.setGravity(Gravity.CENTER, Gravity.CENTER, 0);
                                         toast.show();
                                         return;
-                                    } else {
+                                    } else if (!(input.toString().equals("") || input.toString().equals(null))) {
                                         // Add the stock to DB
                                         mServiceIntent.putExtra(getString(R.string.tag), getString(R.string.add));
                                         mServiceIntent.putExtra(QuoteColumns.QuoteEntry.SYMBOL, input.toString());
@@ -174,6 +174,10 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         getLoaderManager().restartLoader(CURSOR_LOADER_ID, null, this);
     }
 
+    /**
+     * shows snack bar
+     * @param view has the snack bar appended to it
+     */
     public void networkSnackbar(View view) {
         final Snackbar snackbar = Snackbar.make(view, getString(R.string.network_toast), Snackbar.LENGTH_INDEFINITE);
         snackbar.setAction(getString(R.string.OK), new View.OnClickListener() {
@@ -232,10 +236,10 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        //automatically updates when new information is added to the database
         data.setNotificationUri(getContentResolver(), QuoteColumns.QuoteEntry.CONTENT_URI);
         mCursorAdapter.swapCursor(data);
         mCursor = data;
-        Log.i("MSA", ""+data.getCount());
     }
 
     @Override
@@ -243,6 +247,10 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         mCursorAdapter.swapCursor(null);
     }
 
+    /**
+     * checks to see if device is connected or is connecting to the netowrk
+     * @return a boolean suggesting one of the two cases
+     */
     public boolean isConnected() {
         //ConnectivityManager Class that answers queries about the state of network connectivity.
         //Context method returns the handle to a system-level service by class.
@@ -253,10 +261,13 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
+
+    /**
+     * starts intent for activity after historical data is recieved from the network
+     */
     @Override
     public void graphDataLoaded() {
         if (!StockData.isEmpty()) {
-            Log.i("MSA", "Stock data isn't empty");
             Intent intent = new Intent(activity, GraphActivity.class);
             startActivity(intent);
         }

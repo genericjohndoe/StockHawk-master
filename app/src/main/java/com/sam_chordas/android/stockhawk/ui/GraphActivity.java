@@ -22,7 +22,7 @@ import java.util.List;
 
 
 /**
- * Created by joeljohnson on 2/22/17.
+ * Shows historical data of stock
  */
 
 public class GraphActivity  extends AppCompatActivity implements IAxisValueFormatter {
@@ -50,6 +50,12 @@ public class GraphActivity  extends AppCompatActivity implements IAxisValueForma
 
     }
 
+    /**
+     * formats dates shown on graph axis
+     * @param value The time since the epoch in milliseconds
+     * @param axis the axis being formatted
+     * @return a String to be shown in the historical data graph, along the axis
+     */
     @Override
     public String getFormattedValue(float value, AxisBase axis) {
         Calendar cal = Calendar.getInstance();

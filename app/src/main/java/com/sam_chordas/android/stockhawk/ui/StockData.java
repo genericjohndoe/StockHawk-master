@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Created by joeljohnson on 2/22/17.
+ * Class used the transfer stock information between activities
  */
 
 public class StockData implements Parcelable {

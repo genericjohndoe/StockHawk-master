@@ -19,7 +19,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * Created by joeljohnson on 2/22/17.
+ * Pulls historical stock data from the internet
  */
 
 public class GraphAsyncTask extends AsyncTask<String, Void, Void> {
@@ -52,7 +52,6 @@ public class GraphAsyncTask extends AsyncTask<String, Void, Void> {
             MyStocksActivity.StockData.add(datum);
 
         }
-        Log.i("MSA", "Stock data = " + MyStocksActivity.StockData.size());
         return null;
     }
 
@@ -69,7 +68,6 @@ public class GraphAsyncTask extends AsyncTask<String, Void, Void> {
 
     @Override
     protected Void doInBackground(String... strings) {
-        Log.i("MSA", "start async");
         OkHttpClient client = new OkHttpClient();
 
         StringBuilder urlStringBuilder = new StringBuilder();
@@ -85,7 +83,6 @@ public class GraphAsyncTask extends AsyncTask<String, Void, Void> {
             e.printStackTrace();
         }
         String url = urlStringBuilder.toString();
-        Log.i("MSA", "url " + url);
 
         Request request = new Request.Builder()
                 .url(url)
@@ -94,7 +91,7 @@ public class GraphAsyncTask extends AsyncTask<String, Void, Void> {
             Response response = client.newCall(request).execute();
             getStockInfoFromJSON(response.body().string());
         } catch (IOException | JSONException | IllegalStateException e) {
-            Log.i("MSA", e.toString());
+            Log.i("GraphAsyncTask", e.toString());
         }
         return null;
     }
