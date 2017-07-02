@@ -14,17 +14,12 @@ import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.rest.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by joeljohnson on 6/14/16.
  */
 public class StockRemoteViewsService extends RemoteViewsService {
     final String[] STOCK_COLUMNS = {QuoteColumns.QuoteEntry._ID, QuoteColumns.QuoteEntry.SYMBOL,QuoteColumns.QuoteEntry.PERCENT_CHANGE,
             QuoteColumns.QuoteEntry.CHANGE, QuoteColumns.QuoteEntry.BIDPRICE, QuoteColumns.QuoteEntry.ISCURRENT, QuoteColumns.QuoteEntry.ISUP};
-
-    List<String> mCollection = new ArrayList<>();
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
@@ -58,13 +53,6 @@ public class StockRemoteViewsService extends RemoteViewsService {
                         null,
                         null);
                 Binder.restoreCallingIdentity(identityToken);
-
-                /*for (int i = 0; i < data.getCount(); i++){
-                   if (data.moveToPosition(i)){
-                       new StockData(null,
-                               data.getString(data.getColumnIndex(QuoteColumns.BIDPRICE)))
-                   }
-                }*/
             }
 
             @Override
